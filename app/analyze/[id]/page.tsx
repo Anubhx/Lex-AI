@@ -56,25 +56,43 @@ export default function AnalyzePage() {
 
   return (
     <main className="min-h-screen dot-grid" style={{ background: "var(--bg)", color: "var(--text)" }}>
-      <nav style={{ borderBottom: "1px solid var(--border)", padding: "0 2rem" }} className="flex items-center justify-between h-14">
-        <Link href="/" style={{ textDecoration: "none" }} className="flex items-center gap-2">
-          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--green)" }} />
-          <span style={{ fontWeight: 700, letterSpacing: "-0.02em", fontSize: "1rem", color: "var(--text)" }}>LexAI</span>
-        </Link>
-        <Link href="/dashboard" style={{ fontSize: "0.8rem", color: "var(--muted)", textDecoration: "none" }}
-          className="hover:text-white transition-colors">
-          ← Dashboard
-        </Link>
-      </nav>
-
+     <nav style={{
+  borderBottom: "1px solid var(--border)",
+  padding: "0 2rem",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  height: "56px",
+  position: "sticky",
+  top: 0,
+  zIndex: 50,
+  background: "rgba(8,12,14,0.9)",
+  backdropFilter: "blur(12px)"
+}}>
+  <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+    <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--green)" }} />
+    <span style={{ fontWeight: 700, letterSpacing: "-0.02em", fontSize: "1rem", color: "var(--text)" }}>LexAI</span>
+  </Link>
+  <Link href="/dashboard" style={{
+    fontSize: "0.78rem", color: "var(--muted)", textDecoration: "none",
+    display: "flex", alignItems: "center", gap: "0.4rem",
+    padding: "0.4rem 0.9rem", borderRadius: "6px",
+    border: "1px solid var(--border)", transition: "all 0.2s"
+  }}
+    onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--green-border)"; e.currentTarget.style.color = "var(--text)"; }}
+    onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.color = "var(--muted)"; }}
+  >
+    ← Dashboard
+  </Link>
+</nav>
       <div style={{ maxWidth: "800px", margin: "0 auto", padding: "3rem 2rem" }}>
         <div style={{ marginBottom: "2rem" }}>
           <p style={{ fontSize: "0.72rem", color: "var(--green)", letterSpacing: "0.06em", fontWeight: 600, marginBottom: "0.4rem" }}>
             AI ANALYSIS COMPLETE
           </p>
-          <h1 style={{ fontSize: "1.8rem", fontWeight: 700, letterSpacing: "-0.03em" }}>
-            {contract?.name}
-          </h1>
+         <h1 style={{ fontSize: "1.8rem", fontWeight: 700, letterSpacing: "-0.03em", textTransform: "capitalize" }}>
+  {contract?.name?.replace(/\.[^/.]+$/, "")}
+</h1>
         </div>
 
         {analysis && (
