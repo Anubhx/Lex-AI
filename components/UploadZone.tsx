@@ -7,24 +7,22 @@ export default function UploadZone() {
   const [status, setStatus] = useState<"idle" | "uploading" | "analyzing" | "error">("idle");
   const [error, setError] = useState("");
   const [fileName, setFileName] = useState("");
+  const [progress, setProgress] = useState("");
   const router = useRouter();
 
   const processFile = async (file: File) => {
     setFileName(file.name);
     setStatus("uploading");
     setError("");
+    setProgress("Reading contract...");
 
     try {
-      // Upload and parse PDF
       const formData = new FormData();
       formData.append("file", file);
 
-      const uploadRes = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
+      const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
       const uploadData = await uploadRes.json();
+
       if (!uploadRes.ok) {
         setError(uploadData.error || "Upload failed.");
         setStatus("error");
@@ -32,8 +30,8 @@ export default function UploadZone() {
       }
 
       setStatus("analyzing");
+      setProgress("AI is analyzing clauses and risks...");
 
-      // Run AI analysis
       const analyzeRes = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -48,7 +46,6 @@ export default function UploadZone() {
       }
 
       router.push(`/analyze/${uploadData.contractId}`);
-
     } catch {
       setError("Something went wrong. Please try again.");
       setStatus("error");
@@ -66,49 +63,74 @@ export default function UploadZone() {
     disabled: status === "uploading" || status === "analyzing",
   });
 
-  const statusMessages = {
-    uploading: "Reading your contract...",
-    analyzing: "AI is analyzing clauses and risks... (30-60 seconds)",
-    error: "",
-    idle: "",
-  };
+  const isLoading = status === "uploading" || status === "analyzing";
 
   return (
-    <div className="w-full">
-      <div
-        {...getRootProps()}
-        className={`border-2 border-dashed rounded-2xl px-6 py-16 text-center cursor-pointer transition-all duration-200
-          ${isDragActive ? "border-indigo-500 bg-indigo-900/20" : "border-slate-600 hover:border-indigo-500 hover:bg-slate-800/60"}
-          ${status === "uploading" || status === "analyzing" ? "cursor-not-allowed opacity-70" : ""}
-        `}
+    <div>
+      <div {...getRootProps()} style={{
+        border: `1px dashed ${isDragActive ? "var(--green)" : "rgba(255,255,255,0.1)"}`,
+        borderRadius: "14px",
+        padding: "2.5rem 2rem",
+        textAlign: "center",
+        cursor: isLoading ? "not-allowed" : "pointer",
+        background: isDragActive ? "var(--green-glow)" : "var(--bg-card)",
+        backdropFilter: "blur(12px)",
+        transition: "all 0.2s",
+        opacity: isLoading ? 0.8 : 1,
+      }}
+        onMouseEnter={e => { if (!isLoading) e.currentTarget.style.borderColor = "var(--green-border)"; }}
+        onMouseLeave={e => { if (!isLoading) e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; }}
       >
         <input {...getInputProps()} />
-        {status === "idle" || status === "error" ? (
-          <>
-            <div className="text-5xl mb-4">⚖️</div>
-            <p className="text-white font-semibold text-lg mb-2">
-              {isDragActive ? "Drop your contract here" : "Drag & drop your contract PDF"}
-            </p>
-            <p className="text-slate-500 text-sm">or click to browse — PDF files only, max 10MB</p>
-          </>
+
+        {isLoading ? (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: "50%",
+              border: "2px solid var(--green-border)",
+              borderTopColor: "var(--green)",
+              animation: "spin 0.8s linear infinite"
+            }} />
+            <p style={{ color: "var(--green)", fontSize: "0.85rem", fontWeight: 500 }}>{progress}</p>
+            {fileName && <p style={{ color: "var(--muted)", fontSize: "0.75rem" }}>{fileName}</p>}
+          </div>
         ) : (
-          <>
-            <div className="flex items-center justify-center mb-4">
-              <svg className="animate-spin h-10 w-10 text-indigo-400" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-              </svg>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.75rem" }}>
+            <div style={{
+              width: 44, height: 44, borderRadius: "10px",
+              background: "var(--green-glow)", border: "1px solid var(--green-border)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: "1.2rem"
+            }}>⚖️</div>
+            <div>
+              <p style={{ fontWeight: 600, fontSize: "0.9rem", marginBottom: "0.25rem" }}>
+                {isDragActive ? "Drop to analyze" : "Drop your contract here"}
+              </p>
+              <p style={{ color: "var(--muted)", fontSize: "0.78rem" }}>PDF only · Max 10MB · Free to analyze</p>
             </div>
-            <p className="text-indigo-300 font-semibold text-lg">{statusMessages[status]}</p>
-            {fileName && <p className="text-slate-500 text-sm mt-2">{fileName}</p>}
-          </>
+            <div style={{
+              marginTop: "0.5rem",
+              background: "var(--green)", color: "#000",
+              padding: "0.5rem 1.5rem", borderRadius: "6px",
+              fontWeight: 700, fontSize: "0.8rem"
+            }}>
+              Browse files
+            </div>
+          </div>
         )}
       </div>
+
       {status === "error" && error && (
-        <p className="mt-3 text-red-400 text-sm bg-red-900/20 border border-red-800 rounded-lg px-4 py-2">
+        <div style={{
+          marginTop: "0.75rem", padding: "0.75rem 1rem",
+          background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)",
+          borderRadius: "8px", color: "#f87171", fontSize: "0.82rem"
+        }}>
           {error}
-        </p>
+        </div>
       )}
+
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

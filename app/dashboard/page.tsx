@@ -31,38 +31,54 @@ export default function DashboardPage() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-900 text-white">
-      <nav className="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="text-indigo-400 font-bold text-xl">⚖️ LexAI</Link>
-        <UserButton />
+    <main className="min-h-screen dot-grid" style={{ background: "var(--bg)", color: "var(--text)" }}>
+      <nav style={{ borderBottom: "1px solid var(--border)", padding: "0 2rem" }} className="flex items-center justify-between h-14">
+        <Link href="/" className="flex items-center gap-2" style={{ textDecoration: "none" }}>
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--green)" }} />
+          <span style={{ fontWeight: 700, letterSpacing: "-0.02em", fontSize: "1rem", color: "var(--text)" }}>LexAI</span>
+        </Link>
+        <div className="flex items-center gap-4">
+          <span style={{ fontSize: "0.8rem", color: "var(--muted)" }}>Dashboard</span>
+          <UserButton />
+        </div>
       </nav>
 
-      <div className="max-w-5xl mx-auto px-6 py-10">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-white">My Contracts</h1>
-          <p className="text-slate-400 text-sm mt-1">Upload a contract to get instant AI risk analysis.</p>
+      <div style={{ maxWidth: "900px", margin: "0 auto", padding: "3rem 2rem" }}>
+        <div style={{ marginBottom: "2.5rem" }}>
+          <h1 style={{ fontSize: "1.8rem", fontWeight: 700, letterSpacing: "-0.03em", marginBottom: "0.3rem" }}>
+            My Contracts
+          </h1>
+          <p style={{ color: "var(--muted)", fontSize: "0.85rem" }}>Upload a contract to get instant AI risk analysis</p>
         </div>
 
-        <div className="mb-10">
+        <div style={{ marginBottom: "3rem" }}>
           <UploadZone />
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-36 bg-slate-800 rounded-2xl animate-pulse" />
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1rem" }}>
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="glass" style={{ height: "140px", borderRadius: "14px", animation: "pulse 2s infinite" }} />
             ))}
           </div>
         ) : contracts.length === 0 ? (
-          <div className="text-center py-16 border-2 border-dashed border-slate-700 rounded-2xl">
-            <p className="text-4xl mb-4">📄</p>
-            <p className="text-slate-400">No contracts yet. Upload your first one above.</p>
+          <div className="glass" style={{
+            borderRadius: "16px", padding: "4rem 2rem",
+            textAlign: "center", borderStyle: "dashed"
+          }}>
+            <p style={{ fontSize: "2rem", marginBottom: "1rem" }}>📄</p>
+            <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>No contracts yet. Upload your first one above.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {contracts.map((contract) => (
-              <ContractCard key={contract.id} contract={contract} onDelete={handleDelete} />
-            ))}
+          <div>
+            <p style={{ fontSize: "0.75rem", color: "var(--muted)", marginBottom: "1rem", letterSpacing: "0.05em" }}>
+              {contracts.length} CONTRACT{contracts.length !== 1 ? "S" : ""}
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1rem" }}>
+              {contracts.map((contract) => (
+                <ContractCard key={contract.id} contract={contract} onDelete={handleDelete} />
+              ))}
+            </div>
           </div>
         )}
       </div>

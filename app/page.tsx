@@ -2,81 +2,193 @@
 import { useAuth } from "@clerk/nextjs";
 import { SignInButton, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
+import UploadZone from "@/components/UploadZone";
 
 export default function HomePage() {
   const { isSignedIn } = useAuth();
 
   return (
-    <main className="min-h-screen bg-slate-900 text-white">
+    <main style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--text)", fontFamily: "'Geist', sans-serif" }}>
+
       {/* Navbar */}
-      <nav className="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
-        <span className="text-indigo-400 font-bold text-xl">⚖️ LexAI</span>
-        <div className="flex items-center gap-4">
+      <nav style={{
+        borderBottom: "1px solid var(--border)",
+        padding: "0 2rem",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        height: "56px",
+        position: "sticky",
+        top: 0,
+        zIndex: 50,
+        background: "rgba(8,12,14,0.9)",
+        backdropFilter: "blur(12px)"
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--green)" }} />
+          <span style={{ fontWeight: 700, letterSpacing: "-0.02em", fontSize: "1rem" }}>LexAI</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
           {!isSignedIn ? (
             <>
               <SignInButton mode="modal">
-                <button className="px-4 py-2 text-sm rounded-lg border border-slate-600 text-slate-300 hover:bg-slate-800 transition">
-                  Sign In
+                <button style={{ fontSize: "0.8rem", color: "var(--muted)", background: "none", border: "none", cursor: "pointer" }}>
+                  Sign in
                 </button>
               </SignInButton>
-              <Link href="/sign-up" className="px-4 py-2 text-sm rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold transition">
-                Get Started Free
+              <Link href="/sign-up" style={{
+                fontSize: "0.8rem", fontWeight: 600,
+                background: "var(--green)", color: "#000",
+                padding: "0.4rem 1rem", borderRadius: "6px",
+                textDecoration: "none"
+              }}>
+                Get started
               </Link>
             </>
           ) : (
-            <>
-              <Link href="/dashboard" className="px-4 py-2 text-sm text-slate-300 hover:text-white transition">
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+              <Link href="/dashboard" style={{ fontSize: "0.8rem", color: "var(--muted)", textDecoration: "none" }}>
                 Dashboard
               </Link>
               <UserButton />
-            </>
+            </div>
           )}
         </div>
       </nav>
 
+      {/* Dot grid bg */}
+      <div style={{
+        position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none",
+        backgroundImage: "radial-gradient(rgba(16,185,129,0.08) 1px, transparent 1px)",
+        backgroundSize: "32px 32px"
+      }} />
+
       {/* Hero */}
-      <section className="max-w-5xl mx-auto px-6 py-24 text-center">
-        <div className="inline-block bg-indigo-900/40 border border-indigo-700 text-indigo-300 text-xs font-semibold px-4 py-1.5 rounded-full mb-6">
-          Powered by Gemini AI + RAG
+      <section style={{
+        position: "relative", zIndex: 1,
+        padding: "8rem 2rem 4rem",
+        display: "flex", flexDirection: "column",
+        alignItems: "center", textAlign: "center"
+      }}>
+        <div style={{
+          display: "inline-flex", alignItems: "center", gap: "0.5rem",
+          border: "1px solid var(--green-border)", borderRadius: "100px",
+          padding: "0.3rem 0.9rem", marginBottom: "2rem",
+          background: "var(--green-glow)", fontSize: "0.7rem",
+          color: "var(--green)", fontWeight: 500, letterSpacing: "0.05em"
+        }}>
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--green)", display: "inline-block" }} />
+          POWERED BY GEMINI AI + RAG
         </div>
-        <h1 className="text-5xl font-bold text-white leading-tight mb-6">
-          Understand Any Contract
-          <span className="text-indigo-400"> In 60 Seconds</span>
+
+        <h1 style={{
+          fontSize: "clamp(2.8rem, 6vw, 4.5rem)",
+          fontWeight: 800, letterSpacing: "-0.04em",
+          lineHeight: 1.05, maxWidth: "820px", marginBottom: "1.5rem",
+          textShadow: "0 0 80px rgba(16,185,129,0.2)"
+        }}>
+          Know What You&apos;re<br />
+          <span style={{ color: "var(--green)" }}>Signing Before</span> You Sign
         </h1>
-        <p className="text-slate-400 text-lg max-w-2xl mx-auto mb-10">
+
+        <p style={{
+          color: "var(--muted)", fontSize: "1.05rem",
+          maxWidth: "480px", lineHeight: 1.7, marginBottom: "3rem"
+        }}>
           Upload any legal contract and get instant AI-powered risk analysis.
-          Spot red flags, missing clauses, and risky terms before you sign.
+          Spot red flags, missing clauses, and risky terms in 60 seconds.
         </p>
-        <div className="flex items-center justify-center gap-4">
-          {!isSignedIn ? (
-            <Link href="/sign-up" className="px-8 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition">
-              ⚖️ Analyze My Contract Free
-            </Link>
+
+        <div style={{ width: "100%", maxWidth: "560px" }}>
+          {isSignedIn ? (
+            <UploadZone />
           ) : (
-            <Link href="/dashboard" className="px-8 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition">
-              ⚖️ Go to Dashboard
-            </Link>
+            <div style={{
+              border: "1px dashed var(--green-border)",
+              borderRadius: "16px", padding: "3rem 2rem",
+              background: "var(--green-glow)",
+              display: "flex", flexDirection: "column",
+              alignItems: "center", gap: "1rem"
+            }}>
+              <div style={{ fontSize: "2rem" }}>⚖️</div>
+              <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>Sign up to start analyzing contracts</p>
+              <Link href="/sign-up" style={{
+                background: "var(--green)", color: "#000",
+                padding: "0.7rem 2rem", borderRadius: "8px",
+                fontWeight: 700, fontSize: "0.9rem", textDecoration: "none"
+              }}>
+                Analyze My Contract Free →
+              </Link>
+            </div>
           )}
         </div>
       </section>
 
-      {/* Features */}
-      <section className="max-w-5xl mx-auto px-6 pb-24 grid grid-cols-1 md:grid-cols-3 gap-6">
-        {[
-          { icon: "🚨", title: "Red Flag Detection", desc: "AI identifies risky clauses — uncapped liability, auto-renewals, one-sided termination rights and more." },
-          { icon: "📋", title: "Missing Clause Check", desc: "Automatically checks for 18 standard clauses every contract should have and flags what's missing." },
-          { icon: "💬", title: "Ask Anything", desc: "Ask any question about your contract in plain English and get cited answers instantly." },
-        ].map((f) => (
-          <div key={f.title} className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6">
-            <div className="text-3xl mb-3">{f.icon}</div>
-            <h3 className="text-white font-semibold mb-2">{f.title}</h3>
-            <p className="text-slate-400 text-sm leading-relaxed">{f.desc}</p>
-          </div>
-        ))}
+      {/* Stats */}
+      <section style={{ position: "relative", zIndex: 1, padding: "0 2rem 5rem" }}>
+        <div style={{
+          maxWidth: "700px", margin: "0 auto",
+          display: "grid", gridTemplateColumns: "repeat(3, 1fr)",
+          gap: "1px", border: "1px solid var(--border)",
+          borderRadius: "16px", overflow: "hidden"
+        }}>
+          {[
+            { value: "60s", label: "Average analysis time" },
+            { value: "18", label: "Clause types checked" },
+            { value: "100%", label: "Free to start" },
+          ].map((s) => (
+            <div key={s.label} style={{
+              padding: "2rem", textAlign: "center",
+              background: "rgba(255,255,255,0.02)",
+              backdropFilter: "blur(12px)"
+            }}>
+              <div style={{ fontSize: "2rem", fontWeight: 800, color: "var(--green)", letterSpacing: "-0.03em" }}>{s.value}</div>
+              <div style={{ fontSize: "0.75rem", color: "var(--muted)", marginTop: "0.3rem" }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
       </section>
 
-      <footer className="border-t border-slate-800 px-6 py-6 text-center text-slate-600 text-xs">
-        Built with Gemini AI · © 2026 LexAI
+      {/* Features */}
+      <section style={{ position: "relative", zIndex: 1, padding: "0 2rem 6rem", maxWidth: "900px", margin: "0 auto" }}>
+        <h2 style={{ textAlign: "center", fontSize: "1.8rem", fontWeight: 700, letterSpacing: "-0.03em", marginBottom: "3rem" }}>
+          Everything you need to review a contract
+        </h2>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1rem" }}>
+          {[
+            { icon: "🚨", title: "Red Flag Detection", desc: "Uncapped liability, auto-renewals, one-sided termination — AI catches what lawyers charge $500/hr to find." },
+            { icon: "📋", title: "Missing Clause Check", desc: "Automatically checks 18 standard clauses and flags every gap before it becomes a legal problem." },
+            { icon: "💬", title: "Ask Anything", desc: "Ask any question in plain English. Get cited answers pulled directly from your contract." },
+          ].map((f) => (
+            <div key={f.title} style={{
+              borderRadius: "14px", padding: "1.8rem",
+              background: "rgba(255,255,255,0.02)",
+              border: "1px solid var(--border)",
+              backdropFilter: "blur(12px)",
+              transition: "border-color 0.2s",
+            }}
+              onMouseEnter={e => (e.currentTarget.style.borderColor = "var(--green-border)")}
+              onMouseLeave={e => (e.currentTarget.style.borderColor = "var(--border)")}
+            >
+              <div style={{ fontSize: "1.5rem", marginBottom: "1rem" }}>{f.icon}</div>
+              <h3 style={{ fontWeight: 600, fontSize: "0.95rem", marginBottom: "0.6rem" }}>{f.title}</h3>
+              <p style={{ color: "var(--muted)", fontSize: "0.82rem", lineHeight: 1.7 }}>{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer style={{
+        position: "relative", zIndex: 1,
+        borderTop: "1px solid var(--border)", padding: "1.5rem 2rem",
+        display: "flex", justifyContent: "space-between", alignItems: "center"
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <div style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--green)" }} />
+          <span style={{ fontSize: "0.8rem", fontWeight: 600 }}>LexAI</span>
+        </div>
+        <span style={{ fontSize: "0.75rem", color: "var(--muted)" }}>© 2026 · Built with Gemini AI</span>
       </footer>
     </main>
   );

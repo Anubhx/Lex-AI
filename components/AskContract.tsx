@@ -1,6 +1,13 @@
 "use client";
 import { useState } from "react";
 
+const suggestions = [
+  "What are the payment terms?",
+  "Can I terminate this contract?",
+  "Who owns the intellectual property?",
+  "What happens if there is a dispute?",
+];
+
 export default function AskContract({ contractId }: { contractId: string }) {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
@@ -19,12 +26,8 @@ export default function AskContract({ contractId }: { contractId: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ contractId, question }),
       });
-
       const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || "Failed to get answer.");
-        return;
-      }
+      if (!res.ok) { setError(data.error || "Failed to get answer."); return; }
       setAnswer(data.answer);
     } catch {
       setError("Network error. Please try again.");
@@ -34,53 +37,66 @@ export default function AskContract({ contractId }: { contractId: string }) {
   };
 
   return (
-    <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 space-y-4">
-      <div className="flex gap-3">
-        <input
-          type="text"
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleAsk()}
-          placeholder="e.g. What are the payment terms? Can I terminate early?"
-          className="flex-1 bg-slate-900 border border-slate-600 text-white placeholder-slate-500 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
-        />
-        <button
-          onClick={handleAsk}
-          disabled={loading || question.trim().length < 5}
-          className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-800 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition"
-        >
-          {loading ? "..." : "Ask"}
-        </button>
+    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+      <div className="glass" style={{ borderRadius: "14px", padding: "1.5rem" }}>
+        <p style={{ fontSize: "0.72rem", color: "var(--green)", letterSpacing: "0.05em", fontWeight: 600, marginBottom: "1rem" }}>
+          ASK ABOUT THIS CONTRACT
+        </p>
+        <div style={{ display: "flex", gap: "0.5rem" }}>
+          <input type="text" value={question}
+            onChange={e => setQuestion(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && handleAsk()}
+            placeholder="e.g. What are the payment terms?"
+            style={{
+              flex: 1, background: "rgba(255,255,255,0.04)",
+              border: "1px solid var(--border)", borderRadius: "8px",
+              padding: "0.65rem 1rem", color: "var(--text)",
+              fontSize: "0.85rem", outline: "none",
+            }}
+            onFocus={e => e.target.style.borderColor = "var(--green-border)"}
+            onBlur={e => e.target.style.borderColor = "var(--border)"}
+          />
+          <button onClick={handleAsk} disabled={loading || question.trim().length < 5} style={{
+            padding: "0.65rem 1.5rem", borderRadius: "8px",
+            background: "var(--green)", color: "#000",
+            border: "none", cursor: "pointer",
+            fontWeight: 700, fontSize: "0.82rem",
+            opacity: loading || question.trim().length < 5 ? 0.5 : 1,
+          }}>
+            {loading ? "..." : "Ask"}
+          </button>
+        </div>
+
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", marginTop: "0.75rem" }}>
+          {suggestions.map(q => (
+            <button key={q} onClick={() => setQuestion(q)} style={{
+              fontSize: "0.72rem", padding: "0.3rem 0.7rem", borderRadius: "6px",
+              background: "rgba(255,255,255,0.04)", border: "1px solid var(--border)",
+              color: "var(--muted)", cursor: "pointer", transition: "all 0.15s"
+            }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--green-border)"; e.currentTarget.style.color = "var(--text)"; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.color = "var(--muted)"; }}
+            >
+              {q}
+            </button>
+          ))}
+        </div>
       </div>
 
       {error && (
-        <p className="text-red-400 text-sm bg-red-900/20 border border-red-800 rounded-lg px-4 py-2">
+        <div style={{ padding: "0.75rem 1rem", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: "8px", color: "#f87171", fontSize: "0.82rem" }}>
           {error}
-        </p>
-      )}
-
-      {answer && (
-        <div className="bg-slate-900 border border-slate-600 rounded-xl p-4">
-          <p className="text-slate-300 text-sm leading-relaxed">{answer}</p>
         </div>
       )}
 
-      <div className="flex flex-wrap gap-2">
-        {[
-          "What are the payment terms?",
-          "Can I terminate this contract?",
-          "Who owns the intellectual property?",
-          "What happens if there is a dispute?",
-        ].map((q) => (
-          <button
-            key={q}
-            onClick={() => setQuestion(q)}
-            className="text-xs bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-1.5 rounded-full transition"
-          >
-            {q}
-          </button>
-        ))}
-      </div>
+      {answer && (
+        <div className="glass" style={{ borderRadius: "14px", padding: "1.5rem" }}>
+          <p style={{ fontSize: "0.72rem", color: "var(--green)", letterSpacing: "0.05em", fontWeight: 600, marginBottom: "0.75rem" }}>
+            ANSWER
+          </p>
+          <p style={{ color: "rgba(240,244,243,0.85)", fontSize: "0.88rem", lineHeight: 1.8 }}>{answer}</p>
+        </div>
+      )}
     </div>
   );
 }

@@ -10,6 +10,14 @@ import ClauseCard from "@/components/ClauseCard";
 import ContractSummary from "@/components/ContractSummary";
 import AskContract from "@/components/AskContract";
 
+const tabs = [
+  { id: "overview", label: "Overview" },
+  { id: "red flags", label: "Red Flags" },
+  { id: "clauses", label: "Clauses" },
+  { id: "missing", label: "Missing" },
+  { id: "ask AI", label: "Ask AI" },
+];
+
 export default function AnalyzePage() {
   const { id } = useParams();
   const [contract, setContract] = useState<Contract | null>(null);
@@ -17,9 +25,7 @@ export default function AnalyzePage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
 
-  useEffect(() => {
-    if (id) fetchAnalysis();
-  }, [id]);
+  useEffect(() => { if (id) fetchAnalysis(); }, [id]);
 
   const fetchAnalysis = async () => {
     try {
@@ -34,84 +40,76 @@ export default function AnalyzePage() {
     }
   };
 
-  const tabs = ["overview", "red flags", "clauses", "missing", "ask AI"];
-
-  if (loading) {
-    return (
-      <main className="min-h-screen bg-slate-900 text-white flex items-center justify-center">
-        <div className="text-center">
-          <svg className="animate-spin h-10 w-10 text-indigo-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-          </svg>
-          <p className="text-slate-400">Loading analysis...</p>
-        </div>
-      </main>
-    );
-  }
+  if (loading) return (
+    <main style={{ minHeight: "100vh", background: "var(--bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ textAlign: "center" }}>
+        <div style={{
+          width: 40, height: 40, borderRadius: "50%", margin: "0 auto 1rem",
+          border: "2px solid var(--green-border)", borderTopColor: "var(--green)",
+          animation: "spin 0.8s linear infinite"
+        }} />
+        <p style={{ color: "var(--muted)", fontSize: "0.85rem" }}>Loading analysis...</p>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    </main>
+  );
 
   return (
-    <main className="min-h-screen bg-slate-900 text-white">
-      <nav className="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="text-indigo-400 font-bold text-xl">⚖️ LexAI</Link>
-        <Link href="/dashboard" className="text-slate-400 text-sm hover:text-white transition">
+    <main className="min-h-screen dot-grid" style={{ background: "var(--bg)", color: "var(--text)" }}>
+      <nav style={{ borderBottom: "1px solid var(--border)", padding: "0 2rem" }} className="flex items-center justify-between h-14">
+        <Link href="/" style={{ textDecoration: "none" }} className="flex items-center gap-2">
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--green)" }} />
+          <span style={{ fontWeight: 700, letterSpacing: "-0.02em", fontSize: "1rem", color: "var(--text)" }}>LexAI</span>
+        </Link>
+        <Link href="/dashboard" style={{ fontSize: "0.8rem", color: "var(--muted)", textDecoration: "none" }}
+          className="hover:text-white transition-colors">
           ← Dashboard
         </Link>
       </nav>
 
-      <div className="max-w-4xl mx-auto px-6 py-10">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-white mb-1">{contract?.name}</h1>
-          <p className="text-slate-400 text-sm">AI analysis complete</p>
+      <div style={{ maxWidth: "800px", margin: "0 auto", padding: "3rem 2rem" }}>
+        <div style={{ marginBottom: "2rem" }}>
+          <p style={{ fontSize: "0.72rem", color: "var(--green)", letterSpacing: "0.06em", fontWeight: 600, marginBottom: "0.4rem" }}>
+            AI ANALYSIS COMPLETE
+          </p>
+          <h1 style={{ fontSize: "1.8rem", fontWeight: 700, letterSpacing: "-0.03em" }}>
+            {contract?.name}
+          </h1>
         </div>
 
-        {/* Risk Score */}
         {analysis && (
-          <div className="mb-6">
+          <div style={{ marginBottom: "2rem" }}>
             <RiskScore score={analysis.risk_score} />
           </div>
         )}
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6 flex-wrap">
+        <div style={{ display: "flex", gap: "2px", marginBottom: "2rem", background: "rgba(255,255,255,0.03)", borderRadius: "10px", padding: "3px", border: "1px solid var(--border)" }}>
           {tabs.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 text-sm rounded-lg font-medium transition capitalize ${
-                activeTab === tab
-                  ? "bg-indigo-600 text-white"
-                  : "bg-slate-800 text-slate-400 hover:text-white"
-              }`}
-            >
-              {tab}
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
+              flex: 1, padding: "0.5rem 0.75rem",
+              borderRadius: "7px", border: "none", cursor: "pointer",
+              fontSize: "0.78rem", fontWeight: 500,
+              background: activeTab === tab.id ? "var(--green)" : "transparent",
+              color: activeTab === tab.id ? "#000" : "var(--muted)",
+              transition: "all 0.15s"
+            }}>
+              {tab.label}
             </button>
           ))}
         </div>
 
-        {/* Tab Content */}
         {analysis && (
-          <div>
-            {activeTab === "overview" && (
-              <ContractSummary summary={analysis.summary} />
-            )}
-            {activeTab === "red flags" && (
-              <RedFlagList flags={analysis.red_flags} />
-            )}
+          <div className="animate-fade-up">
+            {activeTab === "overview" && <ContractSummary summary={analysis.summary} />}
+            {activeTab === "red flags" && <RedFlagList flags={analysis.red_flags} />}
             {activeTab === "clauses" && (
-              <div className="space-y-3">
-                {analysis.clauses?.map((clause, i) => (
-                  <ClauseCard key={i} clause={clause} />
-                ))}
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                {analysis.clauses?.map((clause, i) => <ClauseCard key={i} clause={clause} />)}
               </div>
             )}
-            {activeTab === "missing" && (
-              <MissingClauses clauses={analysis.missing_clauses} />
-            )}
-            {activeTab === "ask AI" && (
-              <AskContract contractId={id as string} />
-            )}
+            {activeTab === "missing" && <MissingClauses clauses={analysis.missing_clauses} />}
+            {activeTab === "ask AI" && <AskContract contractId={id as string} />}
           </div>
         )}
       </div>

@@ -1,26 +1,23 @@
-"use client";
-
 export default function MissingClauses({ clauses }: { clauses: string[] }) {
-  if (!clauses || clauses.length === 0) {
-    return (
-      <div className="bg-green-900/20 border border-green-700 rounded-2xl p-6 text-center">
-        <p className="text-green-400 font-semibold">✅ All standard clauses present</p>
-      </div>
-    );
-  }
+  if (!clauses || clauses.length === 0) return (
+    <div className="glass" style={{ borderRadius: "14px", padding: "2rem", textAlign: "center" }}>
+      <p style={{ color: "#10b981", fontWeight: 600, fontSize: "0.9rem" }}>✓ All standard clauses present</p>
+    </div>
+  );
 
   return (
-    <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6">
-      <p className="text-slate-400 text-sm mb-4">
-        These standard clauses are missing from your contract:
+    <div className="glass" style={{ borderRadius: "14px", padding: "1.8rem" }}>
+      <p style={{ fontSize: "0.75rem", color: "var(--muted)", letterSpacing: "0.05em", marginBottom: "1.2rem" }}>
+        {clauses.length} MISSING CLAUSE{clauses.length !== 1 ? "S" : ""}
       </p>
-      <div className="flex flex-wrap gap-2">
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
         {clauses.map((clause, i) => (
-          <span
-            key={i}
-            className="bg-orange-900/30 border border-orange-700 text-orange-300 text-xs px-3 py-1.5 rounded-full"
-          >
-            ⚠️ {clause}
+          <span key={i} style={{
+            fontSize: "0.78rem", padding: "0.35rem 0.8rem", borderRadius: "6px",
+            background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)",
+            color: "#f59e0b"
+          }}>
+            {clause}
           </span>
         ))}
       </div>
