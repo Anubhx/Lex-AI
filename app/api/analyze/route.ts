@@ -4,14 +4,41 @@ import { supabaseAdmin } from "@/lib/supabaseClient";
 import { geminiModel } from "@/lib/geminiClient";
 import { analyzeContractPrompt } from "@/prompts/analyzeContract";
 
+async function callGeminiWithRetry(prompt: string, maxAttempts = 3) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const result = await geminiModel.generateContent(prompt);
+      return result;
+    } catch (err: unknown) {
+      const isRetryable = err instanceof Error &&
+        (err.message.includes("503") ||
+         err.message.includes("529") ||
+         err.message.includes("overloaded") ||
+         err.message.includes("Service Unavailable"));
+
+      if (isRetryable && attempt < maxAttempts) {
+        const delay = attempt * 5000;
+        console.log(`Gemini overloaded (attempt ${attempt}/${maxAttempts}), retrying in ${delay / 1000}s...`);
+        await new Promise(r => setTimeout(r, delay));
+      } else {
+        throw err;
+      }
+    }
+  }
+}
+
 export async function POST(req: NextRequest) {
+  let contractId: string | undefined;
+
   try {
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { contractId } = await req.json();
+    const body = await req.json();
+    contractId = body.contractId;
+
     if (!contractId) {
       return NextResponse.json({ error: "Contract ID required" }, { status: 400 });
     }
@@ -33,10 +60,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Contract text not found" }, { status: 400 });
     }
 
-    // Run AI analysis
+    // Run AI analysis with retry
     const prompt = analyzeContractPrompt(contractText);
-    const result = await geminiModel.generateContent(prompt);
-    const rawText = result.response.text()
+    const result = await callGeminiWithRetry(prompt);
+
+    const rawText = result!.response.text()
       .replace(/```json/gi, "")
       .replace(/```/g, "")
       .trim();
@@ -75,10 +103,14 @@ export async function POST(req: NextRequest) {
 
   } catch (error) {
     console.error("Analyze error:", error);
-    await supabaseAdmin
-      .from("contracts")
-      .update({ status: "error" })
-      .eq("id", error as string);
+
+    if (contractId) {
+      await supabaseAdmin
+        .from("contracts")
+        .update({ status: "error" })
+        .eq("id", contractId);
+    }
+
     return NextResponse.json({ error: "Analysis failed. Please try again." }, { status: 500 });
   }
 }
